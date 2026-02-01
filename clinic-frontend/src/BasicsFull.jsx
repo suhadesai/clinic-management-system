@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useState, useEffect } from 'react'
-const API = "http://localhost:3233/"
+const API = "https://clinic-management-system-backend-u5c9.onrender.com/"
 
 export default function BasicsFull() {
   const navigate = useNavigate()
