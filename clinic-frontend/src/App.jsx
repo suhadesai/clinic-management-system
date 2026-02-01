@@ -23,7 +23,7 @@ function App() {
     medName: "", expiryDate:""
   })
 
-  const API = "http://localhost:3233/"
+  const API = "https://clinic-management-system-backend-u5c9.onrender.com/"
 
   const fetchTags = async () => {
     try {
