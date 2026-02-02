@@ -2,7 +2,7 @@ const express = require("express")
 const app = express()
 const PORT = process.env.PORT || 3233;
 const cors = require("cors")
-const corsOptions = {origin: ["https://clinic-management-system-s18a.onrender.com"]}
+const corsOptions = {origin: process.env.FRONTEND_URL, credentials: true,}
 app.use(cors(corsOptions));
 app.use(express.json());
 

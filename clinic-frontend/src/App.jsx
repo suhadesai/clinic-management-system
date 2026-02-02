@@ -23,11 +23,11 @@ function App() {
     medName: "", expiryDate:""
   })
 
-  const API = "https://clinic-management-system-backend-u5c9.onrender.com/"
+  const API = import.meta.env.VITE_API_URL;
 
   const fetchTags = async () => {
     try {
-      const response = await axios.get(API + "get-all-tags");
+      const response = await axios.get(API + "/get-all-tags");
       setAvailableTags(response.data);
     } catch (error) {
       console.error("Failed to fetch tags:", error);
@@ -35,8 +35,8 @@ function App() {
   }
 
   const fetchData = async () => {
-    const reps = await axios.get(API + "get-all");
-    const meds = await axios.get(API + "get-all-meds");
+    const reps = await axios.get(API + "/get-all");
+    const meds = await axios.get(API + "/get-all-meds");
     setAllReps(reps.data);
     setAllMeds(meds.data);
     fetchTags();
@@ -46,7 +46,7 @@ function App() {
     setAllMeds(prev => prev.filter(med => med._id !== id))
   
     try {
-      await axios.delete(API + `delete-med/${id}`)
+      await axios.delete(API + `/delete-med/${id}`)
     } catch (err) {
       fetchData()
     }
@@ -56,7 +56,7 @@ function App() {
     setAllReps(prev => prev.filter(rep => rep._id !== id))
   
     try {
-      await axios.delete(API + `delete/${id}`)
+      await axios.delete(API + `/delete/${id}`)
     } catch (err) {
       fetchData() 
     }
@@ -65,14 +65,14 @@ function App() {
   useEffect(() => { fetchData() }, [])
 
   const handlePostRep = async () => {
-    await axios.post(API + "post", repForm);
+    await axios.post(API + "/post", repForm);
     setRepForm({ repName: "", facilityAndDrug: "", phoneNumber: "", faxNumber: "", location: "", tags: [] });
     fetchData();
     setIsModalOpen(false);
   }
 
   const handlePostMed = async () => {
-    await axios.post(API + "post-med", medForm);
+    await axios.post(API + "/post-med", medForm);
     setMedForm({ medName: "", expiryDate: "" });
     fetchData();
     setIsMedModalOpen(false);
@@ -89,7 +89,7 @@ function App() {
     }
     
     try {
-      await axios.post(API + "create-tag", { tagName });
+      await axios.post(API + "/create-tag", { tagName });
       setAvailableTags(prev => [...prev, tagName]);
       
       setRepForm(prev => ({

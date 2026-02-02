@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useState, useEffect } from 'react'
-const API = "https://clinic-management-system-backend-u5c9.onrender.com/"
+const API = import.meta.env.VITE_API_URL;
 
 export default function BasicsFull() {
   const navigate = useNavigate()
@@ -21,7 +21,7 @@ export default function BasicsFull() {
 
   const fetchTags = async () => {
     try {
-      const response = await axios.get(API + "get-all-tags");
+      const response = await axios.get(API + "/get-all-tags");
       setAvailableTags(response.data);
     } catch (error) {
       console.error("Failed to fetch tags:", error);
@@ -48,7 +48,7 @@ export default function BasicsFull() {
 
     setIsSaving(true);
     try {
-      const response = await axios.put(`${API}update`, formData);
+      const response = await axios.put(`${API}/update`, formData);
       console.log("Update successful:", response.data);
       setIsEditing(false);
       alert("Saved successfully!");
@@ -65,7 +65,7 @@ export default function BasicsFull() {
     if (!tagName) return;
     
     try {
-      await axios.post(API + "create-tag", { tagName });
+      await axios.post(API + "/create-tag", { tagName });
       
       setAvailableTags(prev => [...prev, tagName]);
       
