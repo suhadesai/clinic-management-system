@@ -46,9 +46,16 @@ export default function BasicsFull() {
       return;
     }
 
+    const payload = {
+      ...formData,
+      pdfLinks: typeof formData.pdfLinks === "string"
+        ? formData.pdfLinks.split(",").map(l => l.trim())
+        : formData.pdfLinks
+    };
+
     setIsSaving(true);
     try {
-      const response = await axios.put(`${API}/update`, formData);
+      const response = await axios.put(`${API}/update`, payload);
       console.log("Update successful:", response.data);
       setIsEditing(false);
       alert("Saved successfully!");
@@ -95,6 +102,29 @@ export default function BasicsFull() {
     setIsEditing(false);
   }
 
+
+  const handleCreatePDF = async () => {
+    try {
+      const response = await axios.get(
+        `${API}/create-pdf-by-id/${formData._id}`,
+        { responseType: "blob" }
+      );
+  
+      const blob = new Blob([response.data], { type: "application/pdf" });
+      const url = window.URL.createObjectURL(blob);
+  
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${formData.repName || "basics"}.pdf`;
+      a.click();
+  
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error("PDF creation failed:", err);
+    }
+  };
+  
+
   return (
     <div className="basics-page">
       {/* heading */}
@@ -120,16 +150,23 @@ export default function BasicsFull() {
               </button>
             </>
           ) : (
+            <>
             <button
               className="edit-btn"
               onClick={() => setIsEditing(true)}
             >
               Edit
             </button>
+
+            <button
+              className="edit-btn"
+              onClick={handleCreatePDF} >
+                Create PDF
+            </button>
+            </>
           )}
         </div>
       </div>
-
       {/* big card */}
       <div className="basics-card">
         <h1 className="rep-name">
@@ -220,6 +257,14 @@ export default function BasicsFull() {
               label="Fax Number"
               name="faxNumber"
               value={formData.faxNumber || ''}
+              isEditing={isEditing}
+              onChange={handleChange}
+              disabled={isSaving}
+            />
+            <InfoField
+              label="Links"
+              name="pdfLinks"
+              value={formData.pdfLinks || ''}
               isEditing={isEditing}
               onChange={handleChange}
               disabled={isSaving}

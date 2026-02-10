@@ -1,4 +1,4 @@
-import picture from '../assets/footer-logo_1.png'
+import picture from '../assets/cardlogo2.jpg'
 import { useNavigate } from 'react-router-dom';
 
 function Card(props) {

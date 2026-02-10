@@ -1,6 +1,6 @@
 import '../App.css'
 import picture from '../assets/footer-logo_1.png'
-import search from '../assets/search_logo.avif'
+import search from '../assets/search_logo.png'
 
 function Navbar({value, onChange}) {
   return (
@@ -11,14 +11,15 @@ function Navbar({value, onChange}) {
       </div>
 
       <div className='searchBar'>
-                <img className='searchLogo' src={search}></img>
-
+                
                 <input 
           type='text' 
           placeholder='Search representatives' 
           value={value}
           onChange={onChange}
         />
+        <img className='searchLogo' src={search}></img>
+
             </div>
       
     </nav>

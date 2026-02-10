@@ -1,16 +1,19 @@
 import { useState, useEffect, useMemo } from 'react'
-import { Routes, Route } from 'react-router-dom'
+import { Routes, Route, useNavigate } from 'react-router-dom'
 import axios from 'axios'
 import BasicsFull from './BasicsFull.jsx'
 import Card from './components/Card.jsx'
 import Navbar from './components/Navbar.jsx'
 import './App.css'
+import MedsFull from './MedsFull.jsx';
 
 function App() {
-  const [allBasics, setAllReps] = useState([])
+  const [allBasics, setAllBasics] = useState([])
   const [allMeds, setAllMeds] = useState([])
   const [availableTags, setAvailableTags] = useState([])
+  const [availableMedTags, setAvailableMedTags] = useState([])
   const [newTagInput, setNewTagInput] = useState("") 
+  const [newMedTagInput, setNewMedTagInput] = useState("") 
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isMedModalOpen, setIsMedModalOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState("")
@@ -20,7 +23,7 @@ function App() {
   })
 
   const [medForm, setMedForm] = useState({
-    medName: "", expiryDate:""
+    medName: "", expiryDate: "", dosage: "", lotNumber: "", medTags: []
   })
 
   const API = import.meta.env.VITE_API_URL;
@@ -29,6 +32,8 @@ function App() {
     try {
       const response = await axios.get(API + "/get-all-tags");
       setAvailableTags(response.data);
+      const response2 = await axios.get(API + "/get-all-med-tags");
+      setAvailableMedTags(response2.data);
     } catch (error) {
       console.error("Failed to fetch tags:", error);
     }
@@ -37,7 +42,7 @@ function App() {
   const fetchData = async () => {
     const reps = await axios.get(API + "/get-all");
     const meds = await axios.get(API + "/get-all-meds");
-    setAllReps(reps.data);
+    setAllBasics(reps.data);
     setAllMeds(meds.data);
     fetchTags();
   }
@@ -53,7 +58,7 @@ function App() {
   }
 
   const handleDeleteRep = async (id) => {
-    setAllReps(prev => prev.filter(rep => rep._id !== id))
+    setAllBasics(prev => prev.filter(rep => rep._id !== id))
   
     try {
       await axios.delete(API + `/delete/${id}`)
@@ -66,14 +71,18 @@ function App() {
 
   const handlePostRep = async () => {
     await axios.post(API + "/post", repForm);
-    setRepForm({ repName: "", facilityAndDrug: "", phoneNumber: "", faxNumber: "", location: "", tags: [] });
+    setRepForm({ repName: "", facilityAndDrug: "", phoneNumber: "", faxNumber: "", location: "", tags: [], pdfLinks: [], });
     fetchData();
     setIsModalOpen(false);
   }
 
   const handlePostMed = async () => {
     await axios.post(API + "/post-med", medForm);
-    setMedForm({ medName: "", expiryDate: "" });
+    setMedForm({ medName: "",
+      expiryDate: "",
+      dosage: "",
+      lotNumber: "",
+      medTags: [] });
     fetchData();
     setIsMedModalOpen(false);
   }
@@ -103,6 +112,31 @@ function App() {
       alert("Failed to create tag. It might already exist.");
     }
   }
+  const handleAddNewMedTag = async () => {
+    const tagName = newMedTagInput.trim();
+    if (!tagName) return;
+    
+    if (availableMedTags.includes(tagName)) {
+      alert("Tag already exists!");
+      setNewMedTagInput("");
+      return;
+    }
+    
+    try {
+      await axios.post(API + "/create-med-tag", { tagName });
+      setAvailableMedTags(prev => [...prev, tagName]);
+      
+      setMedForm(prev => ({
+        ...prev,
+        medTags: [...prev.medTags, tagName]
+      }));
+      
+      setNewMedTagInput("");
+    } catch (error) {
+      console.error("Failed to create tag:", error);
+      alert("Failed to create tag. It might already exist.");
+    }
+  }
 
   const toggleTag = (tag) => {
     setRepForm(prev => ({
@@ -110,6 +144,16 @@ function App() {
       tags: prev.tags.includes(tag) ? prev.tags.filter(t => t !== tag) : [...prev.tags, tag]
     }));
   }
+
+  const toggleMedTag = (tag) => {
+    setMedForm(prev => ({
+      ...prev,
+      medTags: prev.medTags.includes(tag)
+        ? prev.medTags.filter(t => t !== tag)
+        : [...prev.medTags, tag]
+    }));
+  };
+  
 
   const filteredReps = useMemo(() => {
     if (!searchQuery.trim()) return allBasics;
@@ -178,6 +222,13 @@ const getExpiryInfo = (dateString) => {
   return { status: 'ok', daysRemaining };
 };
 
+const navigate = useNavigate();
+
+  const handleNav = (eachMed) => {
+    navigate('/meds', { state: eachMed });
+  }
+
+
 
   return (
     <div className="app-container">
@@ -207,6 +258,7 @@ const getExpiryInfo = (dateString) => {
                         expiryInfo.status === 'warning' ? `Expires in ${expiryInfo.daysRemaining} days` : 
                         `Expires in ${expiryInfo.daysRemaining} days`
                       }
+                      onClick={() => handleNav(med)}
                     >
                       <div className="med-item-content">
                         <div className="med-info">
@@ -304,6 +356,8 @@ const getExpiryInfo = (dateString) => {
                     <input placeholder="Phone" value={repForm.phoneNumber} onChange={e => setRepForm({...repForm, phoneNumber: e.target.value})} />
                     <input placeholder="Fax" value={repForm.faxNumber} onChange={e => setRepForm({...repForm, faxNumber: e.target.value})} />
                     <input placeholder="Location" value={repForm.location} onChange={e => setRepForm({...repForm, location: e.target.value})} />
+                    <input placeholder="Links" value={repForm.pdfLinks} onChange={e => setRepForm({...repForm, pdfLinks: e.target.value})} /> 
+                    {/* how do i make links an array input */}
                   </div>
                   <div className="tag-selector">
                     {availableTags.map(tag => (
@@ -343,6 +397,31 @@ const getExpiryInfo = (dateString) => {
                   <div className="form-grid">
                     <input placeholder="Name" value={medForm.medName} onChange={e => setMedForm({...medForm, medName: e.target.value})} />
                     <input placeholder="Date" type='date' value={medForm.expiryDate} onChange={e => setMedForm({...medForm, expiryDate: e.target.value})} />
+                    <input placeholder="Dosage" value={medForm.dosage} onChange={e => setMedForm({...medForm, dosage: e.target.value})} />
+                    <input placeholder="LotNumber" value={medForm.lotNumber} onChange={e => setMedForm({...medForm, lotNumber: e.target.value})} />
+                  </div>
+                  <div className="tag-selector">
+                    {availableMedTags.map(tag => (
+                      <button key={tag} className={medForm.medTags.includes(tag) ? 'active' : ''} onClick={() => toggleMedTag(tag)}>{tag}</button>
+                    ))}
+                    <div className="add-tag-section">
+                      <div className="add-tag-input">
+                        <input
+                          type="text"
+                          placeholder="Add new tag..."
+                          value={newMedTagInput}
+                          onChange={(e) => setNewMedTagInput(e.target.value)}
+                          onKeyPress={(e) => e.key === 'Enter' && handleAddNewMedTag()}
+                        />
+                        <button 
+                          className="add-tag-btn"
+                          onClick={handleAddNewMedTag}
+                          disabled={!newMedTagInput.trim()}
+                        >
+                          Add
+                        </button>
+                      </div>
+                    </div>
                   </div>
                   
                   <div className="modal-actions">
@@ -355,6 +434,7 @@ const getExpiryInfo = (dateString) => {
           </div>
         } />
         <Route path="/basics" element={<BasicsFull />} />
+        <Route path="/meds" element={<MedsFull />} />
       </Routes>
     </div>
   )
