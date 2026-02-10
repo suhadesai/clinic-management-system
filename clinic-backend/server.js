@@ -52,6 +52,10 @@ const medTagsSchema = new mongoose.Schema({
 
 const medTag = new mongoose.model('medTag', medTagsSchema)
 
+app.get("/", async (req, res) => {
+  res.json({message: "Welcome to the Comprehensive Neurology Clinic!"});
+}) 
+
 app.get("/get-all", async (req, res) => {
     const allBasics = await basics.find({});
     res.json(allBasics);
