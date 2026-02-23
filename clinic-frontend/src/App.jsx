@@ -23,7 +23,7 @@ function App() {
   })
 
   const [medForm, setMedForm] = useState({
-    medName: "", expiryDate: "", dosage: "", lotNumber: "", medTags: []
+    medName: "", expiryDate: "", dosage: "", lotNumber: "", medTags: [], quantity: ""
   })
 
   const API = import.meta.env.VITE_API_URL;
@@ -82,7 +82,9 @@ function App() {
       expiryDate: "",
       dosage: "",
       lotNumber: "",
-      medTags: [] });
+      quantity: "",
+      medTags: [],
+     });
     fetchData();
     setIsMedModalOpen(false);
   }
@@ -399,6 +401,7 @@ const navigate = useNavigate();
                     <input placeholder="Date" type='date' value={medForm.expiryDate} onChange={e => setMedForm({...medForm, expiryDate: e.target.value})} />
                     <input placeholder="Dosage" value={medForm.dosage} onChange={e => setMedForm({...medForm, dosage: e.target.value})} />
                     <input placeholder="LotNumber" value={medForm.lotNumber} onChange={e => setMedForm({...medForm, lotNumber: e.target.value})} />
+                    <input placeholder="Quantity" value={medForm.quantity} onChange={e => setMedForm({...medForm, quantity: e.target.value})} />
                   </div>
                   <div className="tag-selector">
                     {availableMedTags.map(tag => (

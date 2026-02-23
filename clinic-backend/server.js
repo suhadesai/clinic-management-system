@@ -36,6 +36,7 @@ const medsSchema = new mongoose.Schema({
     lotNumber: {type: String},
     medTags: [{type: String}],
     repInformation: {type: String},
+    quantity: {type: String},
 })
 
 const meds = new mongoose.model('meds',medsSchema)
@@ -53,7 +54,7 @@ const medTagsSchema = new mongoose.Schema({
 const medTag = new mongoose.model('medTag', medTagsSchema)
 
 app.get("/", async (req, res) => {
-  res.json({message: "Welcome to the Comprehensive Neurology Clinic!"});
+  res.send("Welcome to the Comprehensive Neurology Clinic!");
 }) 
 
 app.get("/get-all", async (req, res) => {
@@ -76,9 +77,9 @@ app.post("/post" , async(req, res) =>{
 })
 
 app.post("/post-med" , async(req, res) =>{
-    const { medName, expiryDate, dosage, lotNumber, medTags } = req.body;
+    const { medName, expiryDate, dosage, lotNumber, medTags, quantity } = req.body;
 
-    const newEntry = new meds({ medName: medName, expiryDate: expiryDate, dosage: dosage, lotNumber: lotNumber, medTags: medTags });
+    const newEntry = new meds({ medName: medName, expiryDate: expiryDate, dosage: dosage, lotNumber: lotNumber, medTags: medTags, quantity: quantity });
     await newEntry.save();
 
     res.send("med recieved and saved");
@@ -133,6 +134,7 @@ app.put("/update-med", async(req, res) =>{
             dosage,
             lotNumber,
             medTags,
+            quantity,
             repInformation
           },
           { new: true } 
@@ -203,29 +205,6 @@ app.get("/get-all-tags", async (req, res) => {
     }
   });
 
-//   const generateBasicsPDF = (doc, basicsData, title = "Basics Report") => {
-//     doc.fontSize(20).text(title, { align: "center" });
-//     doc.moveDown();
-  
-//       doc
-//         .fontSize(14)
-//         .text(`Entry`, { underline: true });
-  
-//       doc.fontSize(11)
-//         .text(`Rep Name: ${basicsData.repName || "N/A"}`)
-//         .text(`Facility & Drug: ${basicsData.facilityAndDrug || "N/A"}`)
-//         .text(`Phone: ${basicsData.phoneNumber || "N/A"}`)
-//         .text(`Fax: ${basicsData.faxNumber || "N/A"}`)
-//         .text(`Location: ${basicsData.location || "N/A"}`)
-//         .text(`Tags: ${basicsData.tags?.join(", ") || "None"}`)
-//         .text(`Links: ${basicsData.pdfLinks?.join(", ") || "None"}`);
-  
-//       doc.moveDown();
-//       doc.moveTo(50, doc.y).lineTo(550, doc.y).stroke();
-//       doc.moveDown();
-    
-// };
-
 const generateBasicsPDF = (doc, basicsData, title = "Basics Report") => {
   // Colors from your palette
   const colors = {
@@ -237,9 +216,6 @@ const generateBasicsPDF = (doc, basicsData, title = "Basics Report") => {
     darkest: "#0D0221",
   };
 
-  // ---------------------------
-  // HEADER BAR
-  // ---------------------------
   doc
     .rect(0, 0, doc.page.width, 70)
     .fill(colors.darkest);
@@ -250,7 +226,7 @@ const generateBasicsPDF = (doc, basicsData, title = "Basics Report") => {
     .font("Helvetica-Bold")
     .text(title, 50, 25);
 
-    try { const logoSize = 40; // adjust size 
+    try { const logoSize = 40;
     doc.image(logoPath, doc.page.width - 50 - logoSize, 15, { 
       width: logoSize, height: logoSize, 
     }); } catch (err) { 
@@ -259,16 +235,12 @@ const generateBasicsPDF = (doc, basicsData, title = "Basics Report") => {
 
   doc.moveDown(2);
 
-  // ---------------------------
-  // SECTION TITLE
-  // ---------------------------
   doc
     .fillColor(colors.darkest)
     .fontSize(16)
     .font("Helvetica-Bold")
     .text("Entry Details", { align: "left" });
 
-  // Accent underline
   doc
     .moveTo(50, doc.y + 2)
     .lineTo(200, doc.y + 2)
@@ -278,9 +250,6 @@ const generateBasicsPDF = (doc, basicsData, title = "Basics Report") => {
 
   doc.moveDown(1.5);
 
-  // ---------------------------
-  // CARD BACKGROUND
-  // ---------------------------
   const cardTop = doc.y;
   const cardPadding = 12;
 
@@ -292,9 +261,6 @@ const generateBasicsPDF = (doc, basicsData, title = "Basics Report") => {
 
   doc.y = cardTop + cardPadding;
 
-  // ---------------------------
-  // CARD CONTENT
-  // ---------------------------
   doc
     .fillColor(colors.light)
     .fontSize(12)

@@ -238,6 +238,15 @@ export default function MedsFull() {
             onChange={handleChange}
             disabled={isSaving}
           />
+
+          <InfoField
+            label="Quantity"
+            name="quantity"
+            value={formData.quantity || ''}
+            isEditing={isEditing}
+            onChange={handleChange}
+            disabled={isSaving}
+          />
           
         </div>
       </div>
